@@ -6,7 +6,7 @@
         {
             Manager, Contributor
         }
-        string _gitHubProps; //not done yet
+        string _gitHubProps; //not done yet, pls 
         public string Name { get; set; }
         public int Id { get; set; }
         public UserType Type { get; set; }
