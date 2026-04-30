@@ -3,3 +3,27 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+# Visual Studio files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.ide
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bin/
+obj/
+
+# Rider files
+.idea/
+
+# Copilot indices
+*.copilot/
+
+# Other files
+*.log
