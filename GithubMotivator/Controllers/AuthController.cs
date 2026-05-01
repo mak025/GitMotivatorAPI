@@ -5,18 +5,23 @@ using AspNet.Security.OAuth.GitHub;
 
 namespace GithubMotivator.Controllers;
 
-[Route("[controller]")]
-public class AuthController : Controller
+[Route("api/[controller]")]
+[ApiController]
+public class AuthController : ControllerBase
 {
-    [HttpGet("Login")]
-    public IActionResult Login(string returnUrl = "/")
+    [HttpGet("github/login")]
+    public async Task Login()
     {
-        return Challenge(new AuthenticationProperties { RedirectUri = returnUrl }, GitHubAuthenticationDefaults.AuthenticationScheme);
+        await HttpContext.ChallengeAsync(GitHubAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties
+        {
+            RedirectUri = "http://localhost:3000/welcome"
+        });
     }
 
-    [HttpGet("Logout")]
-    public IActionResult Logout()
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
     {
-        return SignOut(new AuthenticationProperties { RedirectUri = "/" }, CookieAuthenticationDefaults.AuthenticationScheme);
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return Ok(new { message = "Logged out" });
     }
 }
