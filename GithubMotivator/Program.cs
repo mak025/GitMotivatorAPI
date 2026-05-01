@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using AspNet.Security.OAuth.GitHub;
 using GithubMotivator.Data;
 using GithubMotivator.Models;
+using GithubMotivator.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Octokit;
 using System.Security.Claims;
@@ -23,6 +24,8 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -77,20 +80,44 @@ builder.Services.AddAuthentication(options =>
         httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("GithubMotivator");
         httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
-        int commitCount = 0;
+        int commitCount = 0, prCount = 0, mergeCount = 0, reviewCount = 0;
         try
         {
-            var response = await httpClient.GetAsync($"https://api.github.com/search/commits?q=author:{username}");
-            if (response.IsSuccessStatusCode)
+            httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.cloak-preview");
+
+            var commitResponse = await httpClient.GetAsync($"https://api.github.com/search/commits?q=author:{username}");
+            if (commitResponse.IsSuccessStatusCode)
             {
-                var json = await response.Content.ReadAsStringAsync();
-                using var doc = System.Text.Json.JsonDocument.Parse(json);
+                using var doc = System.Text.Json.JsonDocument.Parse(await commitResponse.Content.ReadAsStringAsync());
                 commitCount = doc.RootElement.GetProperty("total_count").GetInt32();
+            }
+
+            httpClient.DefaultRequestHeaders.Remove("Accept");
+
+            var prResponse = await httpClient.GetAsync($"https://api.github.com/search/issues?q=author:{username}+type:pr");
+            if (prResponse.IsSuccessStatusCode)
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(await prResponse.Content.ReadAsStringAsync());
+                prCount = doc.RootElement.GetProperty("total_count").GetInt32();
+            }
+
+            var mergeResponse = await httpClient.GetAsync($"https://api.github.com/search/issues?q=author:{username}+type:pr+is:merged");
+            if (mergeResponse.IsSuccessStatusCode)
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(await mergeResponse.Content.ReadAsStringAsync());
+                mergeCount = doc.RootElement.GetProperty("total_count").GetInt32();
+            }
+
+            var reviewResponse = await httpClient.GetAsync($"https://api.github.com/search/issues?q=reviewed-by:{username}+type:pr");
+            if (reviewResponse.IsSuccessStatusCode)
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(await reviewResponse.Content.ReadAsStringAsync());
+                reviewCount = doc.RootElement.GetProperty("total_count").GetInt32();
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error fetching commits: {ex.Message}");
+            Console.WriteLine($"Error fetching GitHub stats: {ex.Message}");
         }
 
         // Save to DB
@@ -106,13 +133,19 @@ builder.Services.AddAuthentication(options =>
                 Email = email ?? "",
                 Name = context.Identity?.FindFirst("urn:github:name")?.Value ?? username,
                 Commits = commitCount,
-                Type = GithubMotivator.Models.User.UserType.Contributor // Default
+                PullRequests = prCount,
+                Merges = mergeCount,
+                Reviews = reviewCount,
+                Type = GithubMotivator.Models.User.UserType.Contributor
             };
             dbContext.Users.Add(user);
         }
         else
         {
             user.Commits = commitCount;
+            user.PullRequests = prCount;
+            user.Merges = mergeCount;
+            user.Reviews = reviewCount;
             if (!string.IsNullOrEmpty(email)) user.Email = email;
             dbContext.Users.Update(user);
         }
