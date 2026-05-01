@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GithubMotivator", "GithubMotivator\GithubMotivator.csproj", "{24DFD0B7-234A-4B57-9E6B-9CF704C10283}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GithubMotivator.Tests", "GithubMotivator.Tests\GithubMotivator.Tests.csproj", "{2307E6CB-CAAC-44EE-B5B7-8E345ABC3C0E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{24DFD0B7-234A-4B57-9E6B-9CF704C10283}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24DFD0B7-234A-4B57-9E6B-9CF704C10283}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24DFD0B7-234A-4B57-9E6B-9CF704C10283}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2307E6CB-CAAC-44EE-B5B7-8E345ABC3C0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2307E6CB-CAAC-44EE-B5B7-8E345ABC3C0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2307E6CB-CAAC-44EE-B5B7-8E345ABC3C0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2307E6CB-CAAC-44EE-B5B7-8E345ABC3C0E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
