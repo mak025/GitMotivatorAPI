@@ -6,9 +6,10 @@
         {
             Manager, Contributor
         }
-        string _gitHubProps; //not done yet
-        public string Name { get; set; }
         public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         public UserType Type { get; set; }
         public int Commits { get; set; }
         public int PullRequests { get; set; }
@@ -21,7 +22,7 @@
 
         public override string ToString()
         {
-            return "${Id: {Id}, Name: {Name}, {Commits: {Commits}, PullRequests: {PullRequests}, Merges: {Merges}, Reviews: {Reviews}}}";
+            return $"{{Id: {Id}, Name: {Name}, Username: {Username}, Email: {Email}, Commits: {Commits}, PullRequests: {PullRequests}, Merges: {Merges}, Reviews: {Reviews}}}";
         }
     }
 }
