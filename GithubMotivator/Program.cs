@@ -1,5 +1,4 @@
-<<<<<<< Updated upstream
-=======
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -11,14 +10,11 @@ using Octokit;
 using System.Security.Claims;
 using System.Text;
 
->>>>>>> Stashed changes
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-<<<<<<< Updated upstream
-=======
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.CheckConsentNeeded = context => false;
@@ -33,6 +29,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = GitHubAuthenticationDefaults.AuthenticationScheme;
 })
+
 .AddCookie(options =>
 {
     options.Cookie.Name = "GitMotivator.Auth";
@@ -52,6 +49,9 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "YourSuperSecretKeyForLocalDevelopment"))
     };
 })
+
+.AddCookie()
+
 .AddGitHub(options =>
 {
     options.ClientId = builder.Configuration["GitHub:ClientId"] ?? throw new InvalidOperationException("GitHub ClientId is missing.");
@@ -132,35 +132,44 @@ builder.Services.AddCors(options =>
     });
 });
 
->>>>>>> Stashed changes
 var app = builder.Build();
+
+// Ensure Database is created
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.Database.EnsureCreatedAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
+app.UseStaticFiles();
+
 app.UseRouting();
 
-<<<<<<< Updated upstream
-=======
 app.UseCors("AllowFrontend");
 
 app.UseCookiePolicy();
 app.UseAuthentication();
->>>>>>> Stashed changes
+
+app.UseCors("AllowFrontend");
+
+app.UseAuthentication();
+
 app.UseAuthorization();
 
-app.MapStaticAssets();
+app.MapControllerRoute(
+        name: "api",
+        pattern: "api/{controller}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+        pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
