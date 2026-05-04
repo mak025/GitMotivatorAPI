@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using AspNet.Security.OAuth.GitHub;
 using GithubMotivator.Data;
 using GithubMotivator.Models;
+using GithubMotivator.Services;
 using Microsoft.EntityFrameworkCore;
 using Octokit;
 using System.Security.Claims;
@@ -14,6 +15,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IGithubService, GithubService>();
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
@@ -50,8 +55,6 @@ builder.Services.AddAuthentication(options =>
     };
 })
 
-.AddCookie()
-
 .AddGitHub(options =>
 {
     options.ClientId = builder.Configuration["GitHub:ClientId"] ?? throw new InvalidOperationException("GitHub ClientId is missing.");
@@ -70,32 +73,14 @@ builder.Services.AddAuthentication(options =>
         var email = context.Identity?.FindFirst(ClaimTypes.Email)?.Value;
         var accessToken = context.AccessToken;
 
-        if (string.IsNullOrEmpty(username)) return;
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(accessToken)) return;
 
-        // Fetch commits from GitHub using HttpClient
-        using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("GithubMotivator");
-        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-
-        int commitCount = 0;
-        try
-        {
-            var response = await httpClient.GetAsync($"https://api.github.com/search/commits?q=author:{username}");
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-                using var doc = System.Text.Json.JsonDocument.Parse(json);
-                commitCount = doc.RootElement.GetProperty("total_count").GetInt32();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error fetching commits: {ex.Message}");
-        }
-
-        // Save to DB
         using var scope = context.HttpContext.RequestServices.CreateScope();
+        var githubService = scope.ServiceProvider.GetRequiredService<IGithubService>();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        int commitCount = await githubService.GetUserCommitCountAsync(username, accessToken);
+        int prCount = await githubService.GetUserPullRequestCountAsync(username, accessToken);
 
         var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
         if (user == null)
@@ -105,14 +90,18 @@ builder.Services.AddAuthentication(options =>
                 Username = username,
                 Email = email ?? "",
                 Name = context.Identity?.FindFirst("urn:github:name")?.Value ?? username,
+                GitHubToken = accessToken,
                 Commits = commitCount,
-                Type = GithubMotivator.Models.User.UserType.Contributor // Default
+                PullRequests = prCount,
+                Type = GithubMotivator.Models.User.UserType.Contributor
             };
             dbContext.Users.Add(user);
         }
         else
         {
+            user.GitHubToken = accessToken;
             user.Commits = commitCount;
+            user.PullRequests = prCount;
             if (!string.IsNullOrEmpty(email)) user.Email = email;
             dbContext.Users.Update(user);
         }
@@ -142,7 +131,12 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
@@ -156,10 +150,6 @@ app.UseRouting();
 app.UseCors("AllowFrontend");
 
 app.UseCookiePolicy();
-app.UseAuthentication();
-
-app.UseCors("AllowFrontend");
-
 app.UseAuthentication();
 
 app.UseAuthorization();
