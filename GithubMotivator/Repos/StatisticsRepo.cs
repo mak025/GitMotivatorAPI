@@ -10,23 +10,23 @@ namespace GithubMotivator.Repos
         {
             _context = context;
         }
-        public IEnumerable<Statistics> GetAll()
+        public async Task<IEnumerable<Statistics>> GetAll()
         {
             return _context.Statistics.ToList();
         }
-        public Statistics? Get(int id)
+        public async Task<Statistics?> Get(int id)
         { 
         return _context.Statistics.FirstOrDefault(s => s.Id == id);
         }
-        public Statistics? Add(Statistics stats)
+        public async Task<Statistics?> Add(Statistics stats)
         { 
         return _context.Statistics.Add(stats).Entity;
         }
-        public Statistics? Delete(int id)
+        public async Task<Statistics?> Delete(int id)
         { 
         return _context.Statistics.Remove(_context.Statistics.FirstOrDefault(s => s.Id == id)).Entity;
         }
-        public Statistics? Update(int id, Statistics updatedStats)
+        public async Task<Statistics?> Update(int id, Statistics updatedStats)
         {
             var stats = _context.Statistics.FirstOrDefault(stats => stats.Id == id);
             if (stats != null)
