@@ -15,31 +15,25 @@ namespace GithubMotivator.Controllers
             _repo = repo;
         }
         [HttpGet]
-        public ActionResult<IEnumerable<Statistics>> GetAll()
+        public async Task<ActionResult<IEnumerable<Statistics>>> GetAll()
         {
-            try
+            var statsList = await _repo.GetAll();
+            if (statsList != null && statsList.Any())
             {
-                IEnumerable<Statistics>? result = _repo.GetAll();
-                if (result == null || !result.Any())
-                {
-                    return NoContent();
-                }
-                return Ok(result);
+                return Ok(statsList);
             }
-            catch (Exception ex)
+            else
             {
-                {
-                    return BadRequest(ex.Message);
-                }
+                return NotFound("No statistics found.");
             }
         }
         [HttpGet("{id}")]
-        public ActionResult<Statistics?> Get(int id)
+        public async Task<ActionResult<Statistics?>> Get(int id)
         {
-            var foundStats = _repo.Get(id);
-            if (foundStats != null)
+            var stats = await _repo.Get(id);
+            if (stats != null)
             {
-                return Ok(foundStats);
+                return Ok(stats);
             }
             else
             {
@@ -48,34 +42,25 @@ namespace GithubMotivator.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Statistics?> Post([FromBody] Statistics? stats)
+        public async Task<ActionResult<Statistics?>> Post([FromBody] Statistics? stats)
         {
-            try
+            if (stats != null)
             {
-                if (stats == null)
-                {
-                    return BadRequest("Statistics data is required.");
-                }
-                else
-                {
-                    _repo.Add(stats);
-                    //returns the object AND a string to give our new resource a URI for the header in the response
-                    return Created($"api/items/{stats?.Id}", stats);
-                }
+                var createdStats = await _repo.Add(stats);
+                return CreatedAtAction(nameof(Get), new { id = createdStats.Id }, createdStats);
             }
-            catch (ArgumentException ex)
+            else
             {
-                // Log the exception (not implemented here)
-                return BadRequest(ex.Message);
+                return BadRequest("Invalid statistics data provided.");
             }
         }
         [HttpDelete("{id}")]
-        public ActionResult<Statistics?> Delete(int id)
+        public async Task<ActionResult<Statistics?>> Delete(int id)
         {
-            var statsToDelete = _repo.Get(id);
+            var statsToDelete = await _repo.Get(id);
             if (statsToDelete != null)
             {
-                _repo.Delete(id);
+                await _repo.Delete(id);
                 return Ok(statsToDelete);
             }
             else
@@ -84,19 +69,29 @@ namespace GithubMotivator.Controllers
             }
         }
         [HttpPut("{id}")]
-        public ActionResult<Statistics?> Update(int id, Statistics newStats)
+        public Task<ActionResult<Statistics?>> Update(int id, Statistics newStats)
         {
-            var oldStats = _repo.Get(id);
-            if (oldStats != null)
+            return Task.Run<ActionResult<Statistics?>>(() =>
             {
-                _repo.Update(id, newStats);
-                return Ok(newStats);
-            }
-            else
-            {
-                return NotFound($"No statistics found with ID {id} to update.");
-            }
+                var existingStats = _repo.Get(id).Result;
+                if (existingStats != null)
+                {
+                    existingStats.CommitsTotal = newStats.CommitsTotal;
+                    existingStats.PullRequestsTotal = newStats.PullRequestsTotal;
+                    existingStats.MergesTotal = newStats.MergesTotal;
+                    existingStats.ReviewsTotal = newStats.ReviewsTotal;
+                    existingStats.ContributorsTotal = newStats.ContributorsTotal;
+                    _repo.Update(id, existingStats);
+                    return Ok(existingStats);
+                }
+                else
+                {
+                    return NotFound($"No statistics found with ID {id} to update.");
+                }
+            });
         }
+         
+        
 
     }
 }
