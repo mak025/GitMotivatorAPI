@@ -3,10 +3,10 @@ namespace GithubMotivator.Interfaces
 {
     public interface IStatisticsRepo
     {
-        IEnumerable<Statistics> GetAll();
-        Statistics? Get(int id);
-        Statistics? Add(Statistics stats);
-        Statistics? Delete(int id);
-        Statistics? Update(int id, Statistics updatedStats);
+        Task<IEnumerable<Statistics>> GetAll();
+        Task<Statistics?> Get(int id);
+        Task<Statistics?> Add(Statistics stats);
+        Task<Statistics?> Delete(int id);
+        Task<Statistics?> Update(int id, Statistics updatedStats);
     }
 }
