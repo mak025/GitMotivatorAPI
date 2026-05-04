@@ -5,7 +5,11 @@ using Microsoft.IdentityModel.Tokens;
 using AspNet.Security.OAuth.GitHub;
 using GithubMotivator.Data;
 using GithubMotivator.Models;
+<<<<<<< user.controller
 using GithubMotivator.Repositories;
+=======
+using GithubMotivator.Services;
+>>>>>>> main
 using Microsoft.EntityFrameworkCore;
 using Octokit;
 using System.Security.Claims;
@@ -15,6 +19,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IGithubService, GithubService>();
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
@@ -53,8 +61,6 @@ builder.Services.AddAuthentication(options =>
     };
 })
 
-.AddCookie()
-
 .AddGitHub(options =>
 {
     options.ClientId = builder.Configuration["GitHub:ClientId"] ?? throw new InvalidOperationException("GitHub ClientId is missing.");
@@ -73,6 +79,7 @@ builder.Services.AddAuthentication(options =>
         var email = context.Identity?.FindFirst(ClaimTypes.Email)?.Value;
         var accessToken = context.AccessToken;
 
+<<<<<<< user.controller
         if (string.IsNullOrEmpty(username)) return;
 
         // Fetch commits from GitHub using HttpClient
@@ -119,10 +126,16 @@ builder.Services.AddAuthentication(options =>
         {
             Console.WriteLine($"Error fetching GitHub stats: {ex.Message}");
         }
+=======
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(accessToken)) return;
+>>>>>>> main
 
-        // Save to DB
         using var scope = context.HttpContext.RequestServices.CreateScope();
+        var githubService = scope.ServiceProvider.GetRequiredService<IGithubService>();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        int commitCount = await githubService.GetUserCommitCountAsync(username, accessToken);
+        int prCount = await githubService.GetUserPullRequestCountAsync(username, accessToken);
 
         var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
         if (user == null)
@@ -132,20 +145,28 @@ builder.Services.AddAuthentication(options =>
                 Username = username,
                 Email = email ?? "",
                 Name = context.Identity?.FindFirst("urn:github:name")?.Value ?? username,
+                GitHubToken = accessToken,
                 Commits = commitCount,
                 PullRequests = prCount,
+<<<<<<< user.controller
                 Merges = mergeCount,
                 Reviews = reviewCount,
+=======
+>>>>>>> main
                 Type = GithubMotivator.Models.User.UserType.Contributor
             };
             dbContext.Users.Add(user);
         }
         else
         {
+            user.GitHubToken = accessToken;
             user.Commits = commitCount;
             user.PullRequests = prCount;
+<<<<<<< user.controller
             user.Merges = mergeCount;
             user.Reviews = reviewCount;
+=======
+>>>>>>> main
             if (!string.IsNullOrEmpty(email)) user.Email = email;
             dbContext.Users.Update(user);
         }
@@ -172,10 +193,17 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await dbContext.Database.EnsureCreatedAsync();
+
+    await dbContext.Database.MigrateAsync();
 }
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
@@ -189,10 +217,6 @@ app.UseRouting();
 app.UseCors("AllowFrontend");
 
 app.UseCookiePolicy();
-app.UseAuthentication();
-
-app.UseCors("AllowFrontend");
-
 app.UseAuthentication();
 
 app.UseAuthorization();
