@@ -17,7 +17,7 @@ namespace GithubMotivator.Controllers
             _userRepository = userRepository;
         }
 
-        [HttpGet]
+        [HttpGet ("all")]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userRepository.GetAll();
