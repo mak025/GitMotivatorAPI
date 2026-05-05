@@ -1,11 +1,11 @@
 using GithubMotivator.Models;
+using GithubMotivator.Models.DTOs;
 
 namespace GithubMotivator.Services
 {
     public interface IGithubService
     {
         Task<int> GetUserCommitCountAsync(string username, string token);
-        Task<int> GetUserPullRequestCountAsync(string username, string token);
-        // Add more methods as needed for motivator stats
+        Task<List<GithubMotivator.Models.Commit>> FetchCommitsAsync(string owner, string repo, string token, DateTime? since = null);
     }
 }

@@ -1,5 +1,6 @@
 using Octokit;
 using GithubMotivator.Models;
+using GithubMotivator.Models.DTOs;
 
 namespace GithubMotivator.Services
 {
@@ -19,40 +20,55 @@ namespace GithubMotivator.Services
             var client = CreateClient(token);
             try
             {
-                // Search for commits by author
-                // If Octokit doesn't have a specific SearchCommits, we use the connection directly
                 var uri = new Uri($"search/commits?q=author:{username}", UriKind.Relative);
+                // Note: Octokit doesn't have a direct SearchCommits method in some versions, 
+                // but this custom call works if the API responds
                 var response = await client.Connection.Get<SearchCommitsResponse>(uri, null, null);
                 return response.Body.TotalCount;
             }
-            catch (Exception ex)
+            catch
             {
-                // Log error or handle appropriately
-                Console.WriteLine($"Error fetching commits for {username}: {ex.Message}");
                 return 0;
             }
         }
 
-        public async Task<int> GetUserPullRequestCountAsync(string username, string token)
+        public async Task<List<GithubMotivator.Models.Commit>> FetchCommitsAsync(string owner, string repo, string token, DateTime? since = null)
         {
             var client = CreateClient(token);
+            var commits = new List<GithubMotivator.Models.Commit>();
+
             try
             {
-                // Search for PRs by author
-                var request = new SearchIssuesRequest
+                var request = new CommitRequest();
+                if (since.HasValue)
                 {
-                    Author = username,
-                    Type = IssueTypeQualifier.PullRequest
-                };
-                var result = await client.Search.SearchIssues(request);
-                return result.TotalCount;
+                    request.Since = since.Value;
+                }
+
+                var options = new ApiOptions { PageSize = 100, PageCount = 5 }; // Fetch up to 500 commits
+                var githubCommits = await client.Repository.Commit.GetAll(owner, repo, request, options);
+
+                foreach (var gc in githubCommits)
+                {
+                    commits.Add(new GithubMotivator.Models.Commit
+                    {
+                        Sha = gc.Sha,
+                        Message = gc.Commit.Message,
+                        AuthorName = gc.Commit.Author.Name,
+                        AuthorEmail = gc.Commit.Author.Email,
+                        Date = gc.Commit.Author.Date.DateTime
+                    });
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error fetching PRs for {username}: {ex.Message}");
-                return 0;
+                Console.WriteLine($"Error fetching commits: {ex.Message}");
             }
+
+            return commits;
         }
+
+
     }
 
     public class SearchCommitsResponse
