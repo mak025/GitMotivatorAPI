@@ -58,6 +58,17 @@ public class AuthController : ControllerBase
         var claims = User.Claims.ToList();
         var githubToken = await HttpContext.GetTokenAsync("access_token");
 
+        if (!string.IsNullOrEmpty(githubToken))
+        {
+            var username = User.Identity?.Name;
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user != null && user.GitHubToken != githubToken)
+            {
+                user.GitHubToken = githubToken;
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
         var keyString = _configuration["Jwt:Key"] ?? "YourSuperSecretKeyForLocalDevelopment";
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

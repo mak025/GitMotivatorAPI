@@ -1,12 +1,14 @@
 using GithubMotivator.Data;
 using GithubMotivator.Models.DTOs;
 using GithubMotivator.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace GithubMotivator.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class DashboardController : ControllerBase
@@ -28,8 +30,11 @@ namespace GithubMotivator.Controllers
             var username = User.Identity?.Name;
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             
-            if (user == null || string.IsNullOrEmpty(user.GitHubToken))
-                return Unauthorized("GitHub token missing for current user.");
+            if (user == null)
+                return Unauthorized($"User '{username}' not found in database. Please log in again.");
+
+            if (string.IsNullOrEmpty(user.GitHubToken))
+                return Unauthorized("GitHub token missing for current user. Please try re-logging via GitHub.");
 
             try
             {
