@@ -92,7 +92,7 @@ namespace GithubMotivator.Services
                 // Default to the first one for now as per "just one for now"
                 repo = await _context.Repositories
                     .Include(r => r.Commits)
-                    .OrderByDescending(r => r.Id)
+                    .OrderByDescending(r => r.LastFetchedAt)
                     .FirstOrDefaultAsync();
             }
 
