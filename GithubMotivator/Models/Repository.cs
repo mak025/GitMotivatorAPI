@@ -17,5 +17,7 @@ namespace GithubMotivator.Models
         public DateTime? LastFetchedAt { get; set; }
         
         public ICollection<Commit> Commits { get; set; } = new List<Commit>();
+
+        public List<Milestone> Milestones { get; set; } = new List<Milestone>();
     }
 }

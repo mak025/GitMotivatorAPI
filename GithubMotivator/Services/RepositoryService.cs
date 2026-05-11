@@ -136,7 +136,7 @@ namespace GithubMotivator.Services
 
         private MilestoneProgress CalculateMilestone(int totalCommits)
         {
-            int[] thresholds = { 0, 15, 30, 50, 100, 200, 400, 800, 1600 };
+            int[] thresholds = { 0, 15, 24, 30, 100, 200, 400, 800, 1600 };
             int level = 0;
             int nextThreshold = thresholds[1];
 
