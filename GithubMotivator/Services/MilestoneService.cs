@@ -1,0 +1,33 @@
+﻿using GithubMotivator.Data;
+using GithubMotivator.Models;
+
+namespace GithubMotivator.Services
+{
+    public class MilestoneService
+    {
+        private readonly AppDbContext _context;
+
+        public MilestoneService(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<Milestone> CreateMilestoneAsync(Milestone milestone)
+        {
+            _context.Milestones.Add(milestone);
+            await _context.SaveChangesAsync();
+            return milestone;
+        }
+
+        public async Task<IEnumerable<Milestone>> GetAllMilestonesForRepoAsync(int repoId)
+        { 
+            Repository repo = _context.Repositories.Where(repo => repo.Id == repo.Id).FirstOrDefault();
+            if (repo != null)
+            {
+                return _context.Milestones.Where(milestone => milestone.RepositoryId == repo.Id).ToList();
+            }
+            return null;
+
+        }
+    }
+}
