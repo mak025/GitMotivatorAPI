@@ -38,6 +38,7 @@ public class AppDbContext : DbContext
                 .WithMany(p => p.Commits)
                 .HasForeignKey(d => d.RepositoryId);
         });
+
         modelBuilder.Entity<Milestone>(entity =>
         {
             entity.HasKey(e => e.Id);
