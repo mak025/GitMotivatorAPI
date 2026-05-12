@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Repository> Repositories { get; set; }
     public DbSet<Commit> Commits { get; set; }
+    public DbSet<Milestone> Milestones { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,6 +36,13 @@ public class AppDbContext : DbContext
             entity.HasIndex(e => e.Sha).IsUnique();
             entity.HasOne(d => d.Repository)
                 .WithMany(p => p.Commits)
+                .HasForeignKey(d => d.RepositoryId);
+        });
+        modelBuilder.Entity<Milestone>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne(d => d.Repository)
+                .WithMany(p => p.Milestones)
                 .HasForeignKey(d => d.RepositoryId);
         });
     }
