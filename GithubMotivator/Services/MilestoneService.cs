@@ -20,14 +20,35 @@ namespace GithubMotivator.Services
         }
 
         public async Task<IEnumerable<Milestone>> GetAllMilestonesForRepoAsync(int repoId)
-        { 
+        {
             Repository repo = _context.Repositories.Where(repo => repo.Id == repo.Id).FirstOrDefault();
             if (repo != null)
             {
                 return _context.Milestones.Where(milestone => milestone.RepositoryId == repo.Id).ToList();
             }
             return null;
+        }
 
+        public async Task<Milestone> DeleteMilestoneAsync(int milestoneId)
+        {
+            Milestone milestoneToDelete = _context.Milestones.Where(milestone => milestone.Id == milestoneId).FirstOrDefault();
+            if (milestoneToDelete != null)
+            {
+                _context.Milestones.Remove(milestoneToDelete);
+                await _context.SaveChangesAsync();
+                return milestoneToDelete;
+            }
+            return null;
+        }
+
+        public async Task<Milestone> GetMilestone(int milestoneId)
+        { 
+        var milestone = _context.Milestones.Where(milestone => milestone.Id == milestoneId).FirstOrDefault();
+            if (milestone != null)
+            {
+                return milestone;
+            }
+            return null;
         }
     }
 }
