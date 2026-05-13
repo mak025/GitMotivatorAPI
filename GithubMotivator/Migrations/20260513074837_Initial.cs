@@ -69,6 +69,26 @@ namespace GithubMotivator.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Milestone",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CommitTreshold = table.Column<int>(type: "int", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RepositoryId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Milestone", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Milestone_Repositories_RepositoryId",
+                        column: x => x.RepositoryId,
+                        principalTable: "Repositories",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Commits_RepositoryId",
                 table: "Commits",
@@ -79,6 +99,11 @@ namespace GithubMotivator.Migrations
                 table: "Commits",
                 column: "Sha",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Milestone_RepositoryId",
+                table: "Milestone",
+                column: "RepositoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Repositories_Owner_Name",
@@ -92,6 +117,9 @@ namespace GithubMotivator.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Commits");
+
+            migrationBuilder.DropTable(
+                name: "Milestone");
 
             migrationBuilder.DropTable(
                 name: "Users");
