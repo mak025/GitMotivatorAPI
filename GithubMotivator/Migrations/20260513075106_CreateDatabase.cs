@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GithubMotivator.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class CreateDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -78,7 +78,8 @@ namespace GithubMotivator.Migrations
                     CommitThreshold = table.Column<int>(type: "int", nullable: false),
                     IsCompleted = table.Column<bool>(type: "bit", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RepositoryId = table.Column<int>(type: "int", nullable: false)
+                    RepositoryId = table.Column<int>(type: "int", nullable: false),
+                    RepositoryId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -89,6 +90,11 @@ namespace GithubMotivator.Migrations
                         principalTable: "Repositories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Milestones_Repositories_RepositoryId1",
+                        column: x => x.RepositoryId1,
+                        principalTable: "Repositories",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -106,6 +112,11 @@ namespace GithubMotivator.Migrations
                 name: "IX_Milestones_RepositoryId",
                 table: "Milestones",
                 column: "RepositoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Milestones_RepositoryId1",
+                table: "Milestones",
+                column: "RepositoryId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Repositories_Owner_Name",

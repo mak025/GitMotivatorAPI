@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GithubMotivator.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260512105219_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260513075106_CreateDatabase")]
+    partial class CreateDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,9 +86,14 @@ namespace GithubMotivator.Migrations
                     b.Property<int>("RepositoryId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("RepositoryId1")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("RepositoryId");
+
+                    b.HasIndex("RepositoryId1");
 
                     b.ToTable("Milestones");
                 });
@@ -171,13 +176,15 @@ namespace GithubMotivator.Migrations
 
             modelBuilder.Entity("GithubMotivator.Models.Milestone", b =>
                 {
-                    b.HasOne("GithubMotivator.Models.Repository", "Repository")
-                        .WithMany("Milestones")
+                    b.HasOne("GithubMotivator.Models.Repository", null)
+                        .WithMany()
                         .HasForeignKey("RepositoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Repository");
+                    b.HasOne("GithubMotivator.Models.Repository", null)
+                        .WithMany("Milestones")
+                        .HasForeignKey("RepositoryId1");
                 });
 
             modelBuilder.Entity("GithubMotivator.Models.Repository", b =>
