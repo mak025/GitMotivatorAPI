@@ -3,7 +3,7 @@ using GithubMotivator.Models;
 
 namespace GithubMotivator.Services
 {
-    public class MilestoneService
+    public class MilestoneService : IMilestoneService
     {
         private readonly AppDbContext _context;
 
@@ -56,6 +56,18 @@ namespace GithubMotivator.Services
         var milestone = _context.Milestones.Where(milestone => milestone.Id == milestoneId).FirstOrDefault();
             if (milestone != null)
             {
+                return milestone;
+            }
+            return null;
+        }
+        public async Task<Milestone> CompleteMilestone(int milestoneId)
+        {
+            var milestone = await GetMilestone(milestoneId);
+
+            if (milestone != null)
+            {
+                milestone.IsCompleted = true;
+                await _context.SaveChangesAsync();
                 return milestone;
             }
             return null;
