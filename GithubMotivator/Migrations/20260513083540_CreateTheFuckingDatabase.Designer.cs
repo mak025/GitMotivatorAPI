@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GithubMotivator.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260513075106_CreateDatabase")]
-    partial class CreateDatabase
+    [Migration("20260513083540_CreateTheFuckingDatabase")]
+    partial class CreateTheFuckingDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

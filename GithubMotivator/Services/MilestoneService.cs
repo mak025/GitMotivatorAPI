@@ -14,6 +14,7 @@ namespace GithubMotivator.Services
 
         public async Task<Milestone> CreateMilestoneAsync(Milestone milestone)
         {
+
             _context.Milestones.Add(milestone);
             await _context.SaveChangesAsync();
             return milestone;
@@ -22,8 +23,17 @@ namespace GithubMotivator.Services
         public async Task<IEnumerable<Milestone>> GetAllMilestonesForRepoAsync(int repoId)
         {
             Repository repo = _context.Repositories.Where(repo => repo.Id == repo.Id).FirstOrDefault();
+            List<Milestone> milestones = _context.Milestones.Where(milestone => milestone.RepositoryId == repo.Id).ToList();
+
             if (repo != null)
             {
+                foreach (Milestone milestone in milestones)
+                { 
+                if (milestone.CommitThreshold <= repo.Commits.Count)
+                    {
+                        milestone.IsCompleted = true;
+                    }
+                }
                 return _context.Milestones.Where(milestone => milestone.RepositoryId == repo.Id).ToList();
             }
             return null;

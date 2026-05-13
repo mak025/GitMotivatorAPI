@@ -20,6 +20,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IGithubService, GithubService>();
 builder.Services.AddScoped<IRepositoryService, RepositoryService>();
+builder.Services.AddScoped<IMilestoneService, MilestoneService>();
 builder.Services.AddHostedService<CommitPollingWorker>();
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
