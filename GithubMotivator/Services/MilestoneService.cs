@@ -6,6 +6,7 @@ namespace GithubMotivator.Services
     public class MilestoneService : IMilestoneService
     {
         private readonly AppDbContext _context;
+        //get repo id -> set var = repo.Id -> use var to get milestones for that repo
 
         public MilestoneService(AppDbContext context)
         {
