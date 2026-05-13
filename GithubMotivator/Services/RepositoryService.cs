@@ -134,6 +134,16 @@ namespace GithubMotivator.Services
             }
         }
 
+        public async Task<Models.Repository> GetRepository(int repoId)
+        {
+            var repo = _context.Repositories.Where(repo => repo.Id == repoId).FirstOrDefault();
+            if (repo != null)
+            {
+                return repo;
+            }
+            return null;
+        }
+
         private MilestoneProgress CalculateMilestone(int totalCommits)
         {
             int[] thresholds = { 0, 15, 24, 30, 100, 200, 400, 800, 1600 };

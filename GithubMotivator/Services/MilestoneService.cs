@@ -54,7 +54,7 @@ namespace GithubMotivator.Services
 
         public async Task<Milestone> GetMilestone(int milestoneId)
         { 
-        var milestone = _context.Milestones.Where(milestone => milestone.Id == milestoneId).FirstOrDefault();
+        var milestone =  _context.Milestones.Where(milestone => milestone.Id == milestoneId).FirstOrDefault();
             if (milestone != null)
             {
                 return milestone;
