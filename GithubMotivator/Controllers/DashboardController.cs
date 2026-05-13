@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GithubMotivator.Controllers
 {
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class DashboardController : ControllerBase
