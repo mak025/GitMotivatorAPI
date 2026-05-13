@@ -7,6 +7,5 @@
         public bool IsCompleted { get; set; } = false;
         public string Message { get; set; } = string.Empty;
         public int RepositoryId { get; set; }
-        public Repository Repository { get; set; } = null!;
     }
 }

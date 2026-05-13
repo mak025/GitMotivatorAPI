@@ -42,9 +42,14 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Milestone>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.HasOne(d => d.Repository)
-                .WithMany(p => p.Milestones)
-                .HasForeignKey(d => d.RepositoryId);
+            entity.Property(e => e.CommitThreshold).IsRequired();
+            entity.Property(e => e.Message).IsRequired();
+
+            // Configure the foreign key relationship
+            entity.HasOne<Repository>()
+                  .WithMany() // Assuming Repository doesn't have a navigation property back to Milestones, or adjust as needed
+                  .HasForeignKey(e => e.RepositoryId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
