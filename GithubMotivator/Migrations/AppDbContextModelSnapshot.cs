@@ -83,14 +83,9 @@ namespace GithubMotivator.Migrations
                     b.Property<int>("RepositoryId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RepositoryId1")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("RepositoryId");
-
-                    b.HasIndex("RepositoryId1");
 
                     b.ToTable("Milestones");
                 });
@@ -173,15 +168,13 @@ namespace GithubMotivator.Migrations
 
             modelBuilder.Entity("GithubMotivator.Models.Milestone", b =>
                 {
-                    b.HasOne("GithubMotivator.Models.Repository", null)
-                        .WithMany()
+                    b.HasOne("GithubMotivator.Models.Repository", "Repository")
+                        .WithMany("Milestones")
                         .HasForeignKey("RepositoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GithubMotivator.Models.Repository", null)
-                        .WithMany("Milestones")
-                        .HasForeignKey("RepositoryId1");
+                    b.Navigation("Repository");
                 });
 
             modelBuilder.Entity("GithubMotivator.Models.Repository", b =>

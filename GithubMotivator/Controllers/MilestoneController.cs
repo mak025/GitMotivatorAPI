@@ -35,7 +35,7 @@ namespace GithubMotivator.Controllers
         }
         // POST api/<MilestoneController>
         [HttpPost]
-        public async Task<ActionResult<Milestone>> CreateMilestoneAsync([FromBody] CreateMilestoneRequestDTO milestoneRequest, [FromBody] Repository repo)
+        public async Task<ActionResult<Milestone>> CreateMilestoneAsync([FromBody] CreateMilestoneRequestDTO milestoneRequest, Repository repo)
         {
             if (milestoneRequest == null || milestoneRequest.RepositoryId == null)
             {
