@@ -10,5 +10,6 @@ namespace GithubMotivator.Services
         Task<DashboardStatsDTO> GetDashboardStatsAsync(int? repositoryId = null);
         Task SyncAllRepositoriesAsync();
         Task<Repository> GetRepository(int id);
+        Task<List<Repository>> GetAllRepositories();
     }
 }
