@@ -24,6 +24,7 @@ namespace GithubMotivator.Controllers
         public async Task<ActionResult<List<Milestone>>> GetAllMilestonesAsync(int repoId)
         {
             var milestones = await _milestoneService.GetAllMilestonesForRepoAsync(repoId);
+
             if (milestones == null)
             {
                 return NotFound($"No repository found with id {repoId}");
@@ -35,15 +36,12 @@ namespace GithubMotivator.Controllers
         }
         // POST api/<MilestoneController>
         [HttpPost]
-        public async Task<ActionResult<Milestone>> CreateMilestoneAsync([FromBody] CreateMilestoneRequestDTO milestoneRequest, Repository repo)
+        public async Task<ActionResult<Milestone>> CreateMilestoneAsync([FromBody] CreateMilestoneRequestDTO milestoneRequest)
         {
+            
             if (milestoneRequest == null || milestoneRequest.RepositoryId == null)
             {
                 return BadRequest("Invalid milestone data");
-            }
-            else if (repo == null)
-            {
-                return BadRequest("Invalid repository data");
             }
 
             var createdMilestone = new Milestone{

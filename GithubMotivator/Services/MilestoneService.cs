@@ -1,5 +1,6 @@
 ﻿using GithubMotivator.Data;
 using GithubMotivator.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GithubMotivator.Services
 {
@@ -22,8 +23,10 @@ namespace GithubMotivator.Services
 
         public async Task<IEnumerable<Milestone>> GetAllMilestonesForRepoAsync(int repoId)
         {
-            Repository repo = _context.Repositories.Where(repo => repo.Id == repo.Id).FirstOrDefault();
-            List<Milestone> milestones = _context.Milestones.Where(milestone => milestone.RepositoryId == repo.Id).ToList();
+            var repo = _context.Repositories
+                .Include(r => r.Commits)
+                .FirstOrDefault(r => r.Id == repoId);
+            List<Milestone> milestones = _context.Milestones.Where(milestone => milestone.RepositoryId == repoId).ToList();
 
             if (repo != null)
             {

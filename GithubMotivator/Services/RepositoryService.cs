@@ -135,7 +135,7 @@ namespace GithubMotivator.Services
         }
 
    
-        public async Task<Models.Repository> GetRepository(int repoId)
+        public async Task<Models.Repository> GetRepositoryAsync(int repoId)
         {
             var repo = _context.Repositories.Where(repo => repo.Id == repoId).FirstOrDefault();
             if (repo != null)
