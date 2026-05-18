@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace GithubMotivator.Models
 {
@@ -16,7 +17,10 @@ namespace GithubMotivator.Models
         
         public DateTime? LastFetchedAt { get; set; }
         
+        [JsonIgnore]
         public ICollection<Commit> Commits { get; set; } = new List<Commit>();
+
+        [JsonIgnore]
         public List<Milestone> Milestones { get; set; } = new List<Milestone>(); //is this needed?
     }
 }

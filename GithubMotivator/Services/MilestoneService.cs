@@ -23,28 +23,32 @@ namespace GithubMotivator.Services
 
         public async Task<IEnumerable<Milestone>> GetAllMilestonesForRepoAsync(int repoId)
         {
-            var repo = _context.Repositories
+            var repo = await _context.Repositories
                 .Include(r => r.Commits)
-                .FirstOrDefault(r => r.Id == repoId);
-            List<Milestone> milestones = _context.Milestones.Where(milestone => milestone.RepositoryId == repoId).ToList();
+                .FirstOrDefaultAsync(r => r.Id == repoId);
 
-            if (repo != null)
+            if (repo == null)
             {
-                foreach (Milestone milestone in milestones)
-                { 
-                if (milestone.CommitThreshold <= repo.Commits.Count)
-                    {
-                        milestone.IsCompleted = true;
-                    }
-                }
-                return _context.Milestones.Where(milestone => milestone.RepositoryId == repo.Id).ToList();
+                return null;
             }
-            return null;
+
+            var milestones = await _context.Milestones.Where(milestone => milestone.RepositoryId == repoId).ToListAsync();
+            
+            //flip bool if commits => CommitThreshold
+            foreach (var milestone in milestones)
+            {
+                if (repo.Commits.Count >= milestone.CommitThreshold)
+                {
+                    milestone.IsCompleted = true;
+                }
+            }
+            
+            return milestones;
         }
 
         public async Task<Milestone> DeleteMilestoneAsync(int milestoneId)
         {
-            Milestone milestoneToDelete = _context.Milestones.Where(milestone => milestone.Id == milestoneId).FirstOrDefault();
+            Milestone milestoneToDelete = await _context.Milestones.Where(milestone => milestone.Id == milestoneId).FirstOrDefaultAsync();
             if (milestoneToDelete != null)
             {
                 _context.Milestones.Remove(milestoneToDelete);
@@ -56,7 +60,7 @@ namespace GithubMotivator.Services
 
         public async Task<Milestone> GetMilestone(int milestoneId)
         { 
-        var milestone = _context.Milestones.Where(milestone => milestone.Id == milestoneId).FirstOrDefault();
+        var milestone = await _context.Milestones.Where(milestone => milestone.Id == milestoneId).FirstOrDefaultAsync();
             if (milestone != null)
             {
                 return milestone;

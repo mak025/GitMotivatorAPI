@@ -1,9 +1,7 @@
-﻿using GithubMotivator.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using GithubMotivator.Models;
 using GithubMotivator.Models.DTOs;
 using GithubMotivator.Services;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace GithubMotivator.Controllers
@@ -20,52 +18,40 @@ namespace GithubMotivator.Controllers
         }
 
         // GET: api/<MilestoneController>
-        [HttpGet]
-        public async Task<ActionResult<List<Milestone>>> GetAllMilestonesAsync(int repoId)
+        [HttpGet("all/{repoId:int}")]
+        public async Task<ActionResult<IEnumerable<Milestone>>> GetAllMilestonesAsync(int repoId)
         {
             var milestones = await _milestoneService.GetAllMilestonesForRepoAsync(repoId);
-
             if (milestones == null)
             {
-                return NotFound($"No repository found with id {repoId}");
+                return NotFound($"Milestones for repository with ID {repoId} not found.");
             }
-            else
-            {
-                return Ok(milestones);
-            }
+            return Ok(milestones);
         }
+        
         // POST api/<MilestoneController>
         [HttpPost]
-        public async Task<ActionResult<Milestone>> CreateMilestoneAsync([FromBody] CreateMilestoneRequestDTO milestoneRequest)
+        public async Task<ActionResult<Milestone>> CreateMilestoneAsync(CreateMilestoneRequestDTO milestoneDto)
         {
-            
-            if (milestoneRequest == null || milestoneRequest.RepositoryId == null)
+            var milestone = new Milestone
             {
-                return BadRequest("Invalid milestone data");
-            }
-
-            var createdMilestone = new Milestone{
-                CommitThreshold = milestoneRequest.CommitThreshold,
-                Message = milestoneRequest.Message,
-                RepositoryId = milestoneRequest.RepositoryId
+                Message = milestoneDto.Message,
+                CommitThreshold = milestoneDto.CommitThreshold,
+                RepositoryId = milestoneDto.RepositoryId
             };
-            if (createdMilestone.CommitThreshold == null || createdMilestone.Message == null || createdMilestone.RepositoryId == null)
-            {
-                return BadRequest("Invalid milestone data");
-            }
-            await _milestoneService.CreateMilestoneAsync(createdMilestone);
+            
+            var createdMilestone = await _milestoneService.CreateMilestoneAsync(milestone);
             return CreatedAtAction(nameof(GetAllMilestonesAsync), new { repoId = createdMilestone.RepositoryId }, createdMilestone);
-
         }
 
         // DELETE api/<MilestoneController>/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Milestone>> DeleteMilestoneAsync(int milestoneId)
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult<Milestone>> DeleteMilestoneAsync(int id)
         {
-            var milestoneToDelete = _milestoneService.GetMilestone(milestoneId);
+            var milestoneToDelete = await _milestoneService.GetMilestone(id);
             if (milestoneToDelete != null)
             {
-                await _milestoneService.DeleteMilestoneAsync(milestoneId);
+                await _milestoneService.DeleteMilestoneAsync(id);
                 return Ok(milestoneToDelete);
             }
             else
@@ -73,7 +59,6 @@ namespace GithubMotivator.Controllers
                 return NotFound();
             }
         }
-        
-}
     }
+}
 
