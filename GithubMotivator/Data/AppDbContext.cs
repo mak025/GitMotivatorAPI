@@ -45,11 +45,10 @@ public class AppDbContext : DbContext
             entity.Property(e => e.CommitThreshold).IsRequired();
             entity.Property(e => e.Message).IsRequired();
 
-            // Configure the foreign key relationship
-            entity.HasOne<Repository>()
-                  .WithMany() // Assuming Repository doesn't have a navigation property back to Milestones, or adjust as needed
-                  .HasForeignKey(e => e.RepositoryId)
-                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(r => r.Repository)
+                .WithMany(p => p.Milestones)
+                .HasForeignKey(r => r.RepositoryId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

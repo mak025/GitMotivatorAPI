@@ -6,6 +6,7 @@
         public int CommitThreshold { get; set; }
         public bool IsCompleted { get; set; } = false;
         public string Message { get; set; } = string.Empty;
-        public Repository RepositoryId { get; set; } = null!;
+        public Repository? Repository { get; set; }
+        public int RepositoryId { get; set; }
     }
 }

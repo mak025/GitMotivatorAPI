@@ -15,7 +15,6 @@ namespace GithubMotivator.Services
 
         public async Task<Milestone> CreateMilestoneAsync(Milestone milestone)
         {
-
             _context.Milestones.Add(milestone);
             await _context.SaveChangesAsync();
             return milestone;
