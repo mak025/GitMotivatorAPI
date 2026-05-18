@@ -1,4 +1,5 @@
 using GithubMotivator.Data;
+using GithubMotivator.Models;
 using GithubMotivator.Models.DTOs;
 using GithubMotivator.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -52,6 +53,13 @@ namespace GithubMotivator.Controllers
         {
             var stats = await _repositoryService.GetDashboardStatsAsync();
             return Ok(stats);
+        }
+
+        [HttpGet("repositories")]
+        public async Task<ActionResult<IEnumerable<Repository>>> GetRepositories()
+        {
+            var repos = await _repositoryService.GetAllRepository();
+            return Ok(repos);
         }
     }
 

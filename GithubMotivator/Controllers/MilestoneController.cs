@@ -2,10 +2,12 @@
 using GithubMotivator.Models;
 using GithubMotivator.Models.DTOs;
 using GithubMotivator.Services;
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GithubMotivator.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class MilestoneController : ControllerBase
