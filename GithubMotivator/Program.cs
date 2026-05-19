@@ -143,12 +143,10 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Ensure Database is created
+// Ensure Database is created and migrations are applied
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await dbContext.Database.EnsureCreatedAsync();
-
     await dbContext.Database.MigrateAsync();
 }
 

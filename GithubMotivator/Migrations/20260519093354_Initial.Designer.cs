@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GithubMotivator.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260519084926_Initial")]
+    [Migration("20260519093354_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
