@@ -85,6 +85,7 @@ namespace GithubMotivator.Services
             {
                 repo = await _context.Repositories
                     .Include(r => r.Commits)
+                    .Include(r => r.Milestones)
                     .FirstOrDefaultAsync(r => r.Id == repositoryId.Value);
             }
             else
@@ -102,9 +103,10 @@ namespace GithubMotivator.Services
             
             return new DashboardStatsDTO
             {
+                RepositoryId = repo.Id,
                 RepositoryUrl = repo.Url,
                 TotalCommits = totalCommits,
-                Milestone = CalculateMilestone(totalCommits),
+                Milestone = CalculateMilestone(totalCommits, repo.Milestones.ToList()),
                 Leaderboard = repo.Commits
                     .GroupBy(c => new { c.AuthorEmail, c.AuthorName })
                     .Select(g => new LeaderboardEntry
@@ -134,45 +136,70 @@ namespace GithubMotivator.Services
             }
         }
 
-        private MilestoneProgress CalculateMilestone(int totalCommits)
+   
+        public async Task<Models.Repository> GetRepositoryAsync(int repoId)
         {
-            int[] thresholds = { 0, 15, 24, 30, 100, 200, 400, 800, 1600 };
-            int level = 0;
-            int nextThreshold = thresholds[1];
-
-            for (int i = 0; i < thresholds.Length - 1; i++)
+            var repo = _context.Repositories.Where(repo => repo.Id == repoId).FirstOrDefault();
+            if (repo != null)
             {
-                if (totalCommits >= thresholds[i])
-                {
-                    level = i;
-                    nextThreshold = thresholds[i + 1];
-                }
-                else
-                {
-                    break;
-                }
+                return repo;
             }
-            
-            // If we exceeded all thresholds
-            if (totalCommits >= thresholds[^1])
+            return null;
+        }
+
+        public async Task<List<Repository>> GetAllRepository()
+        {
+            var repos = await _context.Repositories.ToListAsync();
+            return repos;
+        }
+
+        private MilestoneProgress CalculateMilestone(int totalCommits, List<Milestone> customMilestones)
+        {
+            if (customMilestones == null || customMilestones.Count == 0)
             {
-                level = thresholds.Length - 1;
-                nextThreshold = totalCommits + 1; // Or some other logic
+                return new MilestoneProgress
+                {
+                    CurrentLevel = 0,
+                    CommitsInCurrentLevel = totalCommits,
+                    TargetForNextLevel = 0,
+                    Percentage = 0,
+                    Message = "Tilføj din første milestone! 🚀"
+                };
             }
 
-            int currentLevelStart = thresholds[level];
-            int commitsInThisLevel = totalCommits - currentLevelStart;
-            int totalNeededInThisLevel = nextThreshold - currentLevelStart;
+            var sortedMilestones = customMilestones.OrderBy(m => m.CommitThreshold).ToList();
+
+            int completedCount = sortedMilestones.Count(m => totalCommits >= m.CommitThreshold);
+            Milestone? nextMilestone = sortedMilestones.FirstOrDefault(m => totalCommits < m.CommitThreshold);
+
+            if (nextMilestone == null)
+            {
+                // All completed
+                return new MilestoneProgress
+                {
+                    CurrentLevel = completedCount,
+                    CommitsInCurrentLevel = totalCommits,
+                    TargetForNextLevel = sortedMilestones.Last().CommitThreshold,
+                    Percentage = 100,
+                    Message = "Alle milestones er nået! 🎉"
+                };
+            }
+
+            int targetThreshold = nextMilestone.CommitThreshold;
+            double percentage = (double)totalCommits / targetThreshold * 100;
             
-            double percentage = (double)commitsInThisLevel / totalNeededInThisLevel * 100;
+            // Safety checks
             if (percentage > 100) percentage = 100;
+            if (percentage < 0) percentage = 0;
+            if (double.IsNaN(percentage) || double.IsInfinity(percentage)) percentage = 0;
 
             return new MilestoneProgress
             {
-                CurrentLevel = level,
-                CommitsInCurrentLevel = totalCommits, // As requested: total amount of commits
-                TargetForNextLevel = nextThreshold,
-                Percentage = Math.Round(percentage, 2)
+                CurrentLevel = completedCount,
+                CommitsInCurrentLevel = totalCommits,
+                TargetForNextLevel = targetThreshold,
+                Percentage = Math.Round(percentage, 2),
+                Message = nextMilestone.Message
             };
         }
     }

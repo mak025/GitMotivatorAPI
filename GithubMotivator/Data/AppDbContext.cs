@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Repository> Repositories { get; set; }
     public DbSet<Commit> Commits { get; set; }
+    public DbSet<Milestone> Milestones { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,6 +37,18 @@ public class AppDbContext : DbContext
             entity.HasOne(d => d.Repository)
                 .WithMany(p => p.Commits)
                 .HasForeignKey(d => d.RepositoryId);
+        });
+
+        modelBuilder.Entity<Milestone>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.CommitThreshold).IsRequired();
+            entity.Property(e => e.Message).IsRequired();
+
+            entity.HasOne(r => r.Repository)
+                .WithMany(p => p.Milestones)
+                .HasForeignKey(r => r.RepositoryId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

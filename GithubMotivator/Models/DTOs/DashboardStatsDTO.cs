@@ -2,6 +2,7 @@ namespace GithubMotivator.Models.DTOs
 {
     public class DashboardStatsDTO
     {
+        public int RepositoryId { get; set; }
         public string RepositoryUrl { get; set; } = string.Empty;
         public int TotalCommits { get; set; }
         public MilestoneProgress Milestone { get; set; } = new();
@@ -14,6 +15,7 @@ namespace GithubMotivator.Models.DTOs
         public int CommitsInCurrentLevel { get; set; }
         public int TargetForNextLevel { get; set; }
         public double Percentage { get; set; }
+        public string Message { get; set; } = string.Empty;
     }
 
     public class LeaderboardEntry
