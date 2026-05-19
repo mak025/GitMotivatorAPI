@@ -70,21 +70,24 @@ namespace GithubMotivator.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CommitTreshold")
+                    b.Property<int>("CommitThreshold")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RepositoryId")
+                    b.Property<int>("RepositoryId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("RepositoryId");
 
-                    b.ToTable("Milestone");
+                    b.ToTable("Milestones");
                 });
 
             modelBuilder.Entity("GithubMotivator.Models.Repository", b =>
@@ -165,9 +168,13 @@ namespace GithubMotivator.Migrations
 
             modelBuilder.Entity("GithubMotivator.Models.Milestone", b =>
                 {
-                    b.HasOne("GithubMotivator.Models.Repository", null)
+                    b.HasOne("GithubMotivator.Models.Repository", "Repository")
                         .WithMany("Milestones")
-                        .HasForeignKey("RepositoryId");
+                        .HasForeignKey("RepositoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Repository");
                 });
 
             modelBuilder.Entity("GithubMotivator.Models.Repository", b =>

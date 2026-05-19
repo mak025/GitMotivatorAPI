@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GithubMotivator.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260518085526_InitialCommit")]
-    partial class InitialCommit
+    [Migration("20260519084926_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
