@@ -127,9 +127,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "https://githubmotivatorweb-asbabvgzdbaydja5.italynorth-01.azurewebsites.net/")
               .AllowCredentials()
               .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
     });
