@@ -43,7 +43,7 @@ public class AuthController : ControllerBase
         var defaultRedirect = _configuration["GitHub:DefaultRedirectUri"] ?? "http://localhost:3000/welcome";
         await HttpContext.ChallengeAsync(GitHubAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties
         {
-            RedirectUri = redirectUri ?? defaultRedirect
+            RedirectUri = defaultRedirect
         });
     }
 
