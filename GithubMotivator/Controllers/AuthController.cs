@@ -7,9 +7,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 using GithubMotivator.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace GithubMotivator.Controllers;
 
