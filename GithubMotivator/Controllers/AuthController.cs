@@ -38,13 +38,15 @@ public class AuthController : ControllerBase
     /// If left empty, it defaults to the value in appsettings.json or http://localhost:3000/welcome.
     /// </param>
     [HttpGet("github/login")]
-    public async Task Login([FromQuery] string? redirectUri)
+    public async Task Login(string redirectUri = "")
     {
-        var defaultRedirect = _configuration["GitHub:DefaultRedirectUri"] ?? "http://localhost:3000/welcome";
-        await HttpContext.ChallengeAsync(GitHubAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties
+        if (string.IsNullOrEmpty(redirectUri))
         {
-            RedirectUri = defaultRedirect
-        });
+            redirectUri = _configuration["FrontendRedirectUri"] ?? "http://localhost:3000/welcome";
+        }
+
+        var properties = new AuthenticationProperties { RedirectUri = redirectUri };
+        await HttpContext.ChallengeAsync(GitHubAuthenticationDefaults.AuthenticationScheme, properties);
     }
 
     /// <summary>
