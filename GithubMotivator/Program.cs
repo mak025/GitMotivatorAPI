@@ -125,6 +125,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddCors(options =>
 {
+    //Fetching allowed origins from appsettings.json and defaulting to localhost:3000 if not set
     options.AddPolicy("AllowFrontend", policy =>
     {
         var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:3000" };
