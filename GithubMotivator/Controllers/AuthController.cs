@@ -42,7 +42,7 @@ public class AuthController : ControllerBase
     {
         if (string.IsNullOrEmpty(redirectUri))
         {
-            redirectUri = _configuration["FrontendRedirectUri"] ?? "http://localhost:3000/welcome";
+            redirectUri = _configuration["GitHub:FrontendRedirectUri"] ?? "http://localhost:3000/welcome";
         }
 
         var properties = new AuthenticationProperties { RedirectUri = redirectUri };
