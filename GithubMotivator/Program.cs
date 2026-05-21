@@ -147,7 +147,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Must be at the very top of the pipeline
 app.UseForwardedHeaders();
 
 // Ensure Database is created and migrations are applied
