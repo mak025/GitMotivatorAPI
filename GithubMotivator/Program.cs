@@ -36,7 +36,7 @@ builder.Services.AddHostedService<CommitPollingWorker>();
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.CheckConsentNeeded = context => false;
-    options.MinimumSameSitePolicy = SameSiteMode.Lax;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -51,8 +51,8 @@ builder.Services.AddAuthentication(options =>
 .AddCookie(options =>
 {
     options.Cookie.Name = "GitMotivator.Auth";
-    options.Cookie.SameSite = SameSiteMode.Lax;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Events.OnRedirectToLogin = context =>
     {
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -87,8 +87,8 @@ builder.Services.AddAuthentication(options =>
     options.SaveTokens = true;
 
     options.CorrelationCookie.Name = "GitMotivator.Correlation";
-    options.CorrelationCookie.SameSite = SameSiteMode.Lax;
-    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.CorrelationCookie.SameSite = SameSiteMode.None;
+    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
 
     options.Events.OnCreatingTicket = async context =>
     {
@@ -138,7 +138,21 @@ builder.Services.AddCors(options =>
     //Fetching allowed origins from appsettings.json and defaulting to localhost:3000 if not set
     options.AddPolicy("AllowFrontend", policy =>
     {
-        var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:3000" };
+        var originsValue = builder.Configuration["AllowedOrigins"];
+        string[] allowedOrigins;
+        
+        if (!string.IsNullOrEmpty(originsValue))
+        {
+            allowedOrigins = originsValue.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                         .Select(o => o.Trim())
+                                         .ToArray();
+        }
+        else
+        {
+            allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
+                             ?? new[] { "http://localhost:3000" };
+        }
+
         policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
@@ -154,6 +168,9 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Must be at the very top of the pipeline
+app.UseForwardedHeaders();
 
 // Ensure Database is created and migrations are applied
 using (var scope = app.Services.CreateScope())
@@ -179,9 +196,6 @@ else
 app.UseStaticFiles();
 
 app.UseRouting();
-
-// Must be before UseAuthentication/UseAuthorization
-app.UseForwardedHeaders();
 
 app.UseCors("AllowFrontend");
 
