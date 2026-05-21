@@ -135,37 +135,14 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddCors(options =>
 {
-    //Fetching allowed origins from appsettings.json and defaulting to localhost:3000 if not set
     options.AddPolicy("AllowFrontend", policy =>
     {
-        var originsValue = builder.Configuration["AllowedOrigins"];
-        string[] allowedOrigins;
-        
-        if (!string.IsNullOrEmpty(originsValue))
-        {
-            allowedOrigins = originsValue.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                         .Select(o => o.Trim())
-                                         .ToArray();
-        }
-        else
-        {
-            allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
-                             ?? new[] { "http://localhost:3000" };
-        }
-
-        policy.WithOrigins(allowedOrigins)
+        policy.SetIsOriginAllowed(origin => true)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()
               .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
     });
-    options.AddPolicy("AllowAll", policy =>
-        {
-            policy.AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
-        });
 });
 
 var app = builder.Build();
@@ -198,7 +175,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 
 app.UseCookiePolicy();
 app.UseAuthentication();
