@@ -10,8 +10,18 @@ using Microsoft.EntityFrameworkCore;
 using Octokit;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Forwarded Headers to handle HTTPS behind proxy (e.g. DigitalOcean)
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Clear known proxies/networks to allow headers from DigitalOcean's proxy
+    options.KnownProxies.Clear();
+    options.KnownNetworks.Clear();
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -169,6 +179,9 @@ else
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Must be before UseAuthentication/UseAuthorization
+app.UseForwardedHeaders();
 
 app.UseCors("AllowFrontend");
 
