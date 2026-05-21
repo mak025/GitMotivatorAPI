@@ -163,7 +163,9 @@ builder.Services.AddCors(options =>
         {
             policy.AllowAnyOrigin()
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod()
+                .AllowCredentials()
+                .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
         });
 });
 
@@ -197,7 +199,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseCors("AllowFrontend");
+app.UseCors("AllowAll");
 
 app.UseCookiePolicy();
 app.UseAuthentication();
