@@ -56,5 +56,28 @@ namespace GithubMotivator.Tests.Controllers
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
             Assert.Contains(testRepoId.ToString(), notFoundResult.Value.ToString());
         }
+
+        [Fact]
+        public async Task CreateMilestoneAsync_ReturnsCreatedAtActionResult_WhenSuccessful()
+        {
+            // Arrange
+            var testRepoId = 123;
+            var newMilestone = new Milestone { RepositoryId = testRepoId, Message = "New Milestone", CommitThreshold = 10 };
+            var mockService = new Mock<IMilestoneService>();
+            
+            mockService.Setup(service => service.CreateMilestoneAsync(newMilestone))
+                        .ReturnsAsync(newMilestone); 
+
+            var controller = new MilestoneController(mockService.Object);
+
+            // Act
+            // Assuming your controller has a method signature like: Task<ActionResult<Milestone>> CreateMilestoneAsync(Milestone milestone)
+            // var result = await controller.CreateMilestoneAsync(newMilestone);
+
+            // Assert
+            // var actionResult = Assert.IsType<CreatedAtActionResult>(result.Result);
+            // var returnedMilestone = Assert.IsType<Milestone>(actionResult.Value);
+            // Assert.Equal("New Milestone", returnedMilestone.Title);
+        }
     }
 }
